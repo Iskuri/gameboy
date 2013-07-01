@@ -99,7 +99,7 @@ public class Memory {
 
 		} else if(pos < 0xFE00) { // 4K WORK RAM 1 AGAIN
 
-			throw new Exception("Don't touch this for fucks sake");
+			throw new Exception("Don't touch this for gods sake");
 
 		} else if(pos < 0xFEA0) { // Sprite Attribute Table
 
@@ -136,7 +136,7 @@ public class Memory {
 
 		} else if(pos < 0x8000) { // 16K ROM -- ALLOWS CHANGES FOR MEMORY BANK - MAKE WORK IF ASKED FOR
 
-			throw new Exception("Implement rom bank shit");
+			throw new Exception("Implement rom bank");
 
 		} else if(pos < 0xA000) { // 8K VRAM
 

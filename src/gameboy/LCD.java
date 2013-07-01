@@ -90,7 +90,8 @@ public class LCD {
 	}
 
 	private void createDrawspace() {
-
+            
+            
 		drawSpace = new DrawSpace();
 
 		// create JFrames and the like for the pseudo-LCD
@@ -204,7 +205,8 @@ public class LCD {
 	private void drawPX(int x, int y, int val) {
 
 		if(x >= screen.length || x < 0 || y >= screen[x].length || y < 0) {
-			// ignore shit
+			
+		    
 		} else {
 //			System.out.println(x+": "+y+" : "+val);
 			screen[x][y] = (byte)val;
@@ -348,8 +350,7 @@ public class LCD {
 	// 0xff41
 	private void checkInterrupts() {
 
-		// COME BACK TO THIS PAINFUL SHIT
-
+		
 		int modeVal = 0;
 
 		// ly = lyc interrupt

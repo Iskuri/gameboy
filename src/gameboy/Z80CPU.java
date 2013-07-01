@@ -75,7 +75,7 @@ public class Z80CPU {
 
 	private int reverseEndian(int int0, int int1) {
 
-		// re-enable if reverse endian fucks up
+		// re-enable if reverse endian is wrong
 		int sixteenBit = (int0 | int1 << 8);
 //		int sixteenBit = (int1 | int0 << 8);
 
@@ -365,7 +365,7 @@ public class Z80CPU {
 
 				case 0x00: // null int - tis a NOP
 
-					// do nothing, it's a nop muddafukkah, write a check in for when this occures
+					// do nothing, it's a nop , write a check in for when this occures
 					echo("Noplcopter");
 					pointer++;
 
@@ -403,7 +403,7 @@ public class Z80CPU {
 					break;
 				case 0xcb: // some bit shifting thing
 
-					// time for ANOTHER fucking switch case
+					// time for ANOTHER switch case
 					switch(param1) {
 
 						case 0x7c: // BIT 7, H
@@ -418,14 +418,14 @@ public class Z80CPU {
 
 							break;
 						default:
-							throw new Exception("Unknown subopcode: 0x"+Integer.toHexString(param1)+", please work out what it's for, shit's about to get messy");
+							throw new Exception("Unknown subopcode: 0x"+Integer.toHexString(param1)+", please work out what it's for");
 					}
 
 
 					pointer += 2;
 					break;
 
-				case 0x20: // JR NZ -- This is probably where shit if veering off into the wrong direction
+				case 0x20: // JR NZ -- This is probably where stuff if veering off into the wrong direction
 
 					// make sure that this is the right way around and that it's meant to be accessing a memory location and not just adding to the pointer
 
@@ -654,6 +654,8 @@ public class Z80CPU {
 
 					updateFFlags(c());
 
+					System.out.println(c());
+					
 					pointer++;
 
 					break;
