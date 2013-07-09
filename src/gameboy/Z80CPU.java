@@ -88,7 +88,7 @@ public class Z80CPU {
 
 	private void a(int val) {
 
-		registerA = val;
+		registerA = val & 0xFF;
 	}
 
 	private int a() {
@@ -103,7 +103,7 @@ public class Z80CPU {
 
 	private void b(int val) {
 
-		registerB = val;
+		registerB = val & 0xFF;
 	}
 
 	private int c() {
@@ -119,7 +119,10 @@ public class Z80CPU {
 	}
 
 	private void d(int val) {
-		registerD = val;
+	    
+		System.out.println("Setting register D to 0x"+Integer.toHexString(val));
+	   
+		registerD = val & 0xFF;
 	}
 
 	private int e() {
@@ -127,7 +130,7 @@ public class Z80CPU {
 	}
 
 	private void e(int val) {
-		registerE = val;
+		registerE = val & 0xFF;
 	}
 
 	private int f() {
@@ -135,7 +138,7 @@ public class Z80CPU {
 	}
 
 	private void f(int val) {
-		registerF = val;
+		registerF = val & 0xFF;
 	}
 
 	private int h() {
@@ -143,7 +146,7 @@ public class Z80CPU {
 	}
 
 	private void h(int val) {
-		registerH = val;
+		registerH = val & 0xFF;
 	}
 
 	private int l() {
@@ -151,7 +154,7 @@ public class Z80CPU {
 	}
 
 	private void l(int val) {
-		registerL = val;
+		registerL = val & 0xFF;
 	}
 
 	// make sure this is in the right fricking order
@@ -209,7 +212,6 @@ public class Z80CPU {
 	}
 
 	private void sp(int pos) {
-//		echo("Stack Pointer set to: 0x"+Integer.toHexString(pos));
 		stackPointer = pos & 0xffff;
 	}
 
@@ -237,14 +239,11 @@ public class Z80CPU {
 
 	private void testBit(int bit, int val) throws Exception {
 
-//		echo("Testing bit: "+bit+" on val: 0b"+Integer.toBinaryString(val));
 
 		if(((1 << bit) & val) == 0) {
 			f(setBit(fZero, f()));
-//			echo("The bit was zero");
 		} else {
 			f(resetBit(fZero, f()));
-//			echo("The bit was not zero");
 		}
 
 	}
@@ -255,8 +254,6 @@ public class Z80CPU {
 	}
 
 	private boolean zero() {
-
-//		echo("Zero command will return a: "+(((1 << fZero) & f()) != 0));
 
 		return ((1 << fZero) & f()) != 0;
 	}
@@ -276,8 +273,6 @@ public class Z80CPU {
 		int val1 = val & 0xff;
 		int val2 = (val & 0xff00) >> 8;
 
-//		echo("Writing 16 bit vals from "+Integer.toHexString(val) +" as : "+Integer.toHexString(val1)+" and "+Integer.toHexString(val2));
-
 		Gameboy.memory.writeMem(pos, val1 & 0xff);
 		Gameboy.memory.writeMem(pos + 1, val2 & 0xff);
 	}
@@ -288,12 +283,10 @@ public class Z80CPU {
 
 	// calls a subroutine
 	private int call(int point) throws Exception {
-//		echo("Running call at 0x"+Integer.toHexString(point));
 		return run(point);
 	}
 
 	private void push(int val) throws Exception {
-//		echo("Pushing value: "+val);
 		write16(sp()-1, val);
 		sp(sp() - 2);
 
@@ -303,8 +296,6 @@ public class Z80CPU {
 
 		sp(sp() + 2);
 		int val = read16(sp()-1);
-
-//		echo("Popping value: "+val);
 
 		return val;
 	}
@@ -349,7 +340,7 @@ public class Z80CPU {
 			int instruction = Gameboy.memory.readMem(pointer);
 
 			runDebug = true;
-			echo("Pointer at: "+pointer+"( 0x"+Integer.toHexString(pointer) +" ), instruction at: "+Integer.toHexString(instruction & 0xFF));
+//			echo("Pointer at: "+pointer+"( 0x"+Integer.toHexString(pointer) +" ), instruction at: "+Integer.toHexString(instruction & 0xFF));
 			runDebug = false;
 
 			int param1;
@@ -366,7 +357,6 @@ public class Z80CPU {
 				case 0x00: // null int - tis a NOP
 
 					// do nothing, it's a nop , write a check in for when this occures
-					echo("Noplcopter");
 					pointer++;
 
 					break;
@@ -429,20 +419,11 @@ public class Z80CPU {
 
 					// make sure that this is the right way around and that it's meant to be accessing a memory location and not just adding to the pointer
 
-//					runDebug = true;
-//					echo("Running jnz operation at 0x"+Integer.toHexString(pointer));
-//					runDebug = false;
-
 					if(!zero()) {
 						// work out if that -1 should be there, it doesn't seem right
 
-//						runDebug = true;
 						pointer = pointer + signify(param1) + 1;
-//						echo("Making nz jump to: 0x"+Integer.toHexString(pointer));
-//						runDebug = false;
-//						echo("Pointer at: "+pointer);
 					} else {
-//						echo("Not doing a jump");
 						pointer += 2;
 					}
 
@@ -495,6 +476,8 @@ public class Z80CPU {
 
 				case 0xe0: // LD (0xFF + param), A
 
+					System.out.println("LD on pointer: 0x"+Integer.toHexString(pointer) +" on 0x"+Integer.toHexString(param1));
+				    
 					write8(0xFF00 + param1, a());
 
 					pointer += 2;
@@ -564,10 +547,6 @@ public class Z80CPU {
 
 					b(b() - 1);
 
-//					runDebug = true;
-//					echo("dec b to "+b());
-//					runDebug = false;
-
 					updateFFlags(b());
 
 					pointer++;
@@ -604,7 +583,7 @@ public class Z80CPU {
 
 					if(flagVal == 0) {
 //						runDebug = true;
-//						echo("Flag Val is "+flagVal+" at pointer 0x"+Integer.toHexString(pointer));
+//						System.out.println("Flag Val is "+flagVal+" at pointer 0x"+Integer.toHexString(pointer));
 //						runDebug = false;
 					}
 
@@ -638,10 +617,6 @@ public class Z80CPU {
 						// work out if that -1 should be there, it doesn't seem right
 						pointer = pointer + signify(param1) + 1;
 
-//						runDebug = true;
-//						echo("Making z jump to: 0x"+Integer.toHexString(pointer));
-//						runDebug = false;
-
 					} else {
 						pointer += 2;
 					}
@@ -654,7 +629,7 @@ public class Z80CPU {
 
 					updateFFlags(c());
 
-					System.out.println(c());
+//					System.out.println(c());
 					
 					pointer++;
 
@@ -728,8 +703,8 @@ public class Z80CPU {
 
 					d(d() - 1);
 
-//					runDebug = true;
-					echo("Decrementing D into: 0x"+Integer.toHexString(d()));
+					runDebug = true;
+//					echo("Decrementing D into: 0x"+Integer.toHexString(d()));
 					runDebug = false;
 
 					updateFFlags(d());
@@ -769,9 +744,10 @@ public class Z80CPU {
 
 //					runDebug = true;
 
-//					echo("DEC D: 0x"+Integer.toHexString(pointer));
-
 					d(d() - 1);
+					
+					System.out.println("D() Pointer: 0x"+Integer.toHexString(pointer)+" d at value: 0x"+Integer.toHexString(d()));
+					
 					updateFFlags(d());
 
 					pointer++;
