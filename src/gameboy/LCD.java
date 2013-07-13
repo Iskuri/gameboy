@@ -113,8 +113,6 @@ public class LCD {
 
 		int val = busData[0xff40];
 
-//		System.out.println("Running lcd control on 0x"+Integer.toHexString(val));
-
 		if(getBit(7,val)) {
 			activeScreen = true;
 		} else {
@@ -195,8 +193,6 @@ public class LCD {
 				xVal = 0;
 				yVal++;
 			}
-
-//			System.out.println("Running: "+(i - bgTileDataStart));
 
 		}
 
@@ -295,7 +291,9 @@ public class LCD {
 	// 0xff44 - r
 	private void lcdcY() {
 
-		lcdc = lcdc % 153 + 3;
+//		lcdc = lcdc % 153 + 3;
+		lcdc = 0x90;
+		
 		busData[0xff44] = lcdc;
 	}
 

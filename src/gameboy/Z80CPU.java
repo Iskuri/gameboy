@@ -32,7 +32,6 @@ public class Z80CPU {
 
 	private int stackPointer = 0;
 	private int programCounter = 0;
-	private int carry = 0;
 
 	private int registerA;
 	private int registerB;
@@ -55,6 +54,8 @@ public class Z80CPU {
 	// 16 bit address bus
 	private int[] addressBus = new int[2^16];
 
+	private int progressCounter = 0;
+	
 	boolean runDebug = false;
 
 	public Z80CPU() {
@@ -120,8 +121,6 @@ public class Z80CPU {
 
 	private void d(int val) {
 	    
-		System.out.println("Setting register D to 0x"+Integer.toHexString(val));
-	   
 		registerD = val & 0xFF;
 	}
 
@@ -177,6 +176,8 @@ public class Z80CPU {
 
 	private void de(int val) {
 
+//		echo("Setting val to 0x"+Integer.toHexString(val));
+		
 		int dVal = val & 0xFF00;
 		int eVal = val & 0xFF;
 
@@ -325,9 +326,7 @@ public class Z80CPU {
 
 	private void echo(String string) {
 
-		if(runDebug) {
-			System.out.println(string);
-		}
+		System.out.println(string);
 
 	}
 
@@ -336,12 +335,15 @@ public class Z80CPU {
 		// add a switch case to process each instruction as it comes
 
 		while(true) {
-
+			
+			// for keeping progress on where i am and where the code is going
+			progressCounter++;
+			
+//			if(pointer == 0x8f) {
+//				throw new Exception("Got to pointer 0x8f");
+//			}
+			
 			int instruction = Gameboy.memory.readMem(pointer);
-
-			runDebug = true;
-//			echo("Pointer at: "+pointer+"( 0x"+Integer.toHexString(pointer) +" ), instruction at: "+Integer.toHexString(instruction & 0xFF));
-			runDebug = false;
 
 			int param1;
 			int param2;
@@ -415,24 +417,27 @@ public class Z80CPU {
 					pointer += 2;
 					break;
 
-				case 0x20: // JR NZ -- This is probably where stuff if veering off into the wrong direction
+				case 0x20: // JR NZ
 
-					// make sure that this is the right way around and that it's meant to be accessing a memory location and not just adding to the pointer
-
+					echo("Zero setting is: "+zero());
+					
 					if(!zero()) {
-						// work out if that -1 should be there, it doesn't seem right
-
+						
+						echo("Jumping from pointer: 0x"+Integer.toHexString(pointer));
 						pointer = pointer + signify(param1) + 1;
+						echo("Jumping to pointer: 0x"+Integer.toHexString(pointer));
 					} else {
 						pointer += 2;
 					}
 
 					break;
 
-				case 0xe: // LD C
+				case 0xe: // LD C, N
 
 					c(param1);
 
+//					echo(progressCounter+" Currently doing LD C at pointer: 0x"+Integer.toHexString(pointer) +" : 0x"+Integer.toHexString(param1));
+					
 					pointer += 2;
 
 					break;
@@ -476,8 +481,6 @@ public class Z80CPU {
 
 				case 0xe0: // LD (0xFF + param), A
 
-					System.out.println("LD on pointer: 0x"+Integer.toHexString(pointer) +" on 0x"+Integer.toHexString(param1));
-				    
 					write8(0xFF00 + param1, a());
 
 					pointer += 2;
@@ -581,12 +584,6 @@ public class Z80CPU {
 
 					int flagVal = a() - param1;
 
-					if(flagVal == 0) {
-//						runDebug = true;
-//						System.out.println("Flag Val is "+flagVal+" at pointer 0x"+Integer.toHexString(pointer));
-//						runDebug = false;
-					}
-
 					updateFFlags(flagVal);
 
 					pointer += 2;
@@ -605,6 +602,8 @@ public class Z80CPU {
 
 					a(a() - 1);
 
+					echo(progressCounter+" Descending A at pointer: 0x"+Integer.toHexString(pointer) +" to 0x"+Integer.toHexString(a()));
+					
 					updateFFlags(a());
 
 					pointer++;
@@ -629,7 +628,7 @@ public class Z80CPU {
 
 					updateFFlags(c());
 
-//					System.out.println(c());
+//					echo(c());
 					
 					pointer++;
 
@@ -637,6 +636,8 @@ public class Z80CPU {
 
 				case 0x2e: // LD L N
 
+					echo("Loading into L: 0x"+Integer.toHexString(param1));
+					
 					l(param1);
 
 					pointer += 2;
@@ -645,6 +646,8 @@ public class Z80CPU {
 
 				case 0x18: // JR - Unconditional jump
 
+					echo(progressCounter+" At 0x"+Integer.toHexString(pointer)+" going to: 0x"+Integer.toHexString(pointer + signify(param1) + 1));
+					
 					pointer = pointer + signify(param1) + 1;
 
 					break;
@@ -703,10 +706,6 @@ public class Z80CPU {
 
 					d(d() - 1);
 
-					runDebug = true;
-//					echo("Decrementing D into: 0x"+Integer.toHexString(d()));
-					runDebug = false;
-
 					updateFFlags(d());
 
 					pointer++;
@@ -742,11 +741,7 @@ public class Z80CPU {
 
 				case 0x15: // DEC D
 
-//					runDebug = true;
-
 					d(d() - 1);
-					
-					System.out.println("D() Pointer: 0x"+Integer.toHexString(pointer)+" d at value: 0x"+Integer.toHexString(d()));
 					
 					updateFFlags(d());
 
@@ -754,10 +749,7 @@ public class Z80CPU {
 					break;
 				default:
 
-					echo("Unknown opcode: 0x"+Integer.toHexString(instruction & 0xff)+", please work out what it's for");
-					System.exit(1);
-
-//					throw new Exception("Unknown opcode: 0x"+Integer.toHexString(instruction & 0xff)+", please work out what it's for");
+					throw new Exception("Unknown opcode: 0x"+Integer.toHexString(instruction & 0xff)+", please work out what it's for");
 			}
 
 		}
