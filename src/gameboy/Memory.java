@@ -93,11 +93,13 @@ public class Memory {
 
 		} else if(pos < 0xE000) { // 4K WORK RAM 2
 
-			throw new Exception("Find out what to put here");
+//			throw new Exception("Find out what to put here, 4k work ram 2");
+			System.out.println("Find out what to put here, 4k work ram 2");
 
 		} else if(pos < 0xFE00) { // 4K WORK RAM 1 AGAIN
 
-			throw new Exception("Don't touch this for gods sake");
+//			throw new Exception("Don't touch this for gods sake");
+			System.out.println("Don't touch this for gods sake");
 
 		} else if(pos < 0xFEA0) { // Sprite Attribute Table
 

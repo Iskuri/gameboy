@@ -360,7 +360,7 @@ public class Z80CPU {
 			
 			int instruction = Gameboy.memory.readMem(pointer);
 
-//			echo(progressCounter+": Pointer at: 0x"+hex(pointer)+" with opcode: 0x"+hex(instruction));
+			echo(progressCounter+": Pointer at: 0x"+hex(pointer)+" with opcode: 0x"+hex(instruction));
 			
 			int param1;
 			int param2;
@@ -875,6 +875,21 @@ public class Z80CPU {
 					a(a() | c());
 					
 					updateFFlags(a());
+					pointer += 1;
+					break;
+					
+				case 0xd5: // PUSH DE
+					
+					push(de());
+					
+					pointer += 1;
+					break;
+				case 0x7a: // LD A, D
+					
+					a(d());
+					
+					updateFFlags(a());
+					
 					pointer += 1;
 					break;
 				default:
