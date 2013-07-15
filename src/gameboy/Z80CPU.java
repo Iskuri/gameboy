@@ -441,11 +441,6 @@ public class Z80CPU {
 						pointer = pointer + signify(param1);
 					} else {
 						
-						if(pointer == 0x8c) {
-							echo("Hitting jumping point");
-							System.exit(0);
-						}
-						
 						pointer += 2;
 					}
 
@@ -567,8 +562,6 @@ public class Z80CPU {
 
 					b(b() - 1);
 
-					echo("0x"+hex(pointer)+" DECCING B: 0x"+hex(b()));
-					
 					updateFFlags(b());
 
 					pointer++;
@@ -661,14 +654,6 @@ public class Z80CPU {
 					break;
 
 				case 0x18: // JR - Unconditional jump
-
-//					if(pointer == 0x53) {
-//						echo("Should be jumping to 0x48, am jumping to 0x"+hex(pointer + signify(param1)));
-//					}
-
-					if(pointer == 0x93) {
-						echo("Should be jumping to 0x60, am jumping to 0x"+hex(pointer + signify(param1)));
-					}
 					
 					pointer = pointer + signify(param1);
 
@@ -765,8 +750,6 @@ public class Z80CPU {
 
 					d(d() - 1);
 
-					echo("D is decced to: "+hex(d()));
-					
 					updateFFlags(d());
 
 					pointer++;
@@ -779,9 +762,61 @@ public class Z80CPU {
 					
 					pointer++ ;
 					break;
+				case 0x16: // LD D, NN
+					
+					d(param1);
+					
+					updateFFlags(d());
+					
+					pointer += 2;
+					break;
+				case 0xbe: // CP (HL)
+					
+					int cmp = read8(hl());
+					
+					updateFFlags(a() - cmp);
+					
+					pointer += 1;
+					break;
+				case 0x23: // INC HL
+					
+					hl(hl() + 1);
+					
+					updateFFlags(hl());
+					
+					pointer += 1;
+					break;
+				case 0x7d: // LD A, L
+					
+					a(l());
+					
+					updateFFlags(a());
+					
+					pointer += 1;
+					break;
+				case 0x78: // LD A, B
+					
+					a(b());
+					
+					updateFFlags(a());
+					
+					pointer += 1;
+					break;
+				case 0x86: // ADD A, (HL)
+					
+					a(a() + read8(hl()));
+					
+					updateFFlags(a());
+					pointer += 1;
+					break;
+				case 0xc3: // JP NNNN
+					
+					pointer = reverseEndian(param1, param2);
+					
+					break;
 				default:
 
-					throw new Exception("Unknown opcode: 0x"+Integer.toHexString(instruction & 0xff)+", please work out what it's for");
+					throw new Exception(progressCounter+": Unknown opcode: 0x"+Integer.toHexString(instruction & 0xff)+", please work out what it's for");
 			}
 
 		}
