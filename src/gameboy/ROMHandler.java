@@ -41,7 +41,7 @@ public class ROMHandler {
 		return (int) romData[pos];
 	}
 
-	private void overwriteBIOS() throws IOException {
+	public void overwriteBIOS() throws IOException {
 
 		// get the bios
 		ROMHandler biosRom = new ROMHandler("bios");
@@ -53,7 +53,7 @@ public class ROMHandler {
 
 	}
 
-	private void removeBIOS() {
+	public void removeBIOS() {
 
 		for(int i = 0 ; i < 256 ; i++) {
 			romData[i] = tempRom[i];

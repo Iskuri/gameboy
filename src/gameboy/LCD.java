@@ -291,8 +291,16 @@ public class LCD {
 	// 0xff44 - r
 	private void lcdcY() {
 
-//		lcdc = lcdc % 153 + 3;
-		lcdc = 0x90;
+//		lcdc = lcdc % 153 + 1;
+//		lcdc = 0x90;
+		
+		// CHANGE THIS FOR GODS SAKE
+		
+		if(lcdc == 0x90) {
+			lcdc = 0x91;
+		} else {
+			lcdc = 0x90;
+		}
 		
 		busData[0xff44] = lcdc;
 	}

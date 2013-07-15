@@ -64,9 +64,7 @@ public class Memory {
 	}
 
 	public void writeMem(int pos, int val) throws Exception {
-
-//		System.out.println("Writing: 0x"+Integer.toHexString(val)+" to 0x"+Integer.toHexString(pos));
-
+		
 		val = val & 0xff;
 
 		if(pos < 0x4000) { // 16K ROM
@@ -111,6 +109,16 @@ public class Memory {
 			throw new Exception("Access addressssed illegal memory location");
 		} else if(pos < 0xFF80) { // I/O Ports - This means AddressBus BOY
 
+			// Please remove this fugly hack at some point >.<
+			if(pos == 0xFF50) {
+				
+				if(val != 0x00) {
+					rom.removeBIOS();
+				} else {
+					rom.overwriteBIOS();
+				}
+			}
+			
 			addressBus.writeBus(pos, val);
 			addressBus.updateHardware();
 
@@ -119,7 +127,9 @@ public class Memory {
 			hram.writeMem(pos - 0xFF80, val);
 
 		} else if(pos == 0xFFFF) {
-			throw new Exception("This is to do with interrupts, you should not be here");
+//			throw new Exception("This is to do with interrupts, you should not be here");
+			System.out.println("Enabling interrupts or something, please implement this!");
+			
 		} else {
 			throw new Exception("You broke something, good luck finding it");
 		}
@@ -173,7 +183,10 @@ public class Memory {
 			return hram.readMem(pos - 0xFF80);
 
 		} else if(pos == 0xFFFF) {
-			throw new Exception("Make enabling interrupts work");
+//			throw new Exception("Make enabling interrupts work");
+			System.out.println("Make enabling interrupts work");
+		
+			return 0;
 		} else {
 			throw new Exception("You broke something, good luck finding it");
 		}

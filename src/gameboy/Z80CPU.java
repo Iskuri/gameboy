@@ -356,11 +356,12 @@ public class Z80CPU {
 			
 			// for keeping progress on where i am and where the code is going
 			progressCounter++;
-			
 			globalPointer = pointer;
 			
 			int instruction = Gameboy.memory.readMem(pointer);
 
+//			echo(progressCounter+": Pointer at: 0x"+hex(pointer)+" with opcode: 0x"+hex(instruction));
+			
 			int param1;
 			int param2;
 			int param3;
@@ -427,10 +428,14 @@ public class Z80CPU {
 							c(rl(c()));
 
 							break;
+						case 0x87: // RES 0, A
+							
+							a(resetBit(0, a()));
+							
+							break;
 						default:
 							throw new Exception("Unknown subopcode: 0x"+Integer.toHexString(param1)+", please work out what it's for");
 					}
-
 
 					pointer += 2;
 					break;
@@ -491,10 +496,10 @@ public class Z80CPU {
 					pointer++;
 					break;
 
-				case 0xe0: // LD (0xFF + param), A
-
+				case 0xe0: // LD (0xFF00 + param), A
+					
 					write8(0xFF00 + param1, a());
-
+					
 					pointer += 2;
 					break;
 
@@ -702,7 +707,7 @@ public class Z80CPU {
 					break;
 
 				case 0xf0: // LD A, (FF00 + n)
-
+					
 					a(read8(0xFF00 + param1));
 
 					pointer += 2;
@@ -812,11 +817,69 @@ public class Z80CPU {
 				case 0xc3: // JP NNNN
 					
 					pointer = reverseEndian(param1, param2);
+
+					break;
+				case 0x47: // LD B, A
 					
+					b(a());
+					
+					updateFFlags(b());
+					pointer += 1;
+					break;
+				case 0x87: // ADD A, A
+					
+					a(a() + a());
+					
+					updateFFlags(a());
+					pointer += 1;
+					break;
+				case 0xe6: // AND A, NN
+					
+					a(a() & param1);
+					
+					updateFFlags(a());
+					pointer += 1;
+					break;		
+				case 0x7f: // LD A, A
+					
+					a(a());
+					
+					updateFFlags(a());
+					pointer += 1;
+					break;
+				case 0x01: // LD BC, NNNN
+					
+					bc(reverseEndian(param1, param2));
+					
+					updateFFlags(bc());
+					pointer += 3;
+					break;
+				case 0x36: // LD (HL), NN
+					
+					write8(hl(), param1);
+					
+					updateFFlags(param1);
+					
+					pointer += 2;
+					break;
+				case 0xb: // DEC BC
+					
+					bc(bc() - 1);
+					
+					updateFFlags(bc());
+					
+					pointer += 1;
+					break;
+				case 0xb1: // OR C
+					
+					a(a() | c());
+					
+					updateFFlags(a());
+					pointer += 1;
 					break;
 				default:
 
-					throw new Exception(progressCounter+": Unknown opcode: 0x"+Integer.toHexString(instruction & 0xff)+", please work out what it's for");
+					throw new Exception(progressCounter+": Unknown opcode at 0x"+hex(pointer)+" with opcode 0x"+hex(instruction & 0xff)+", please work out what it's for");
 			}
 
 		}
