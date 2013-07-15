@@ -71,6 +71,13 @@ public class Z80CPU {
 			f(resetBit(fZero, f()));
 //			echo("The byte was not zero");
 		}
+		
+		if((flagValue & 0x100) == 0) {
+			f(resetBit(fCarry, f()));
+		} else {
+			f(setBit(fCarry, f()));
+		}
+		
 
 	}
 
@@ -258,6 +265,11 @@ public class Z80CPU {
 
 		return ((1 << fZero) & f()) != 0;
 	}
+	
+	private boolean carry() {
+		
+		return ((1 << fCarry) & f()) != 0;
+	}
 
 	private int read8(int pos) throws Exception {
 		return Gameboy.memory.readMem(pos);
@@ -290,7 +302,6 @@ public class Z80CPU {
 	private void push(int val) throws Exception {
 		write16(sp()-1, val);
 		sp(sp() - 2);
-
 	}
 
 	private int pop() throws Exception {
@@ -315,13 +326,14 @@ public class Z80CPU {
 
 	private int signify(int val) {
 
-		if(((1 << 7) & val) == 0) {
-			return val;
-		} else {
-			return (val ^ 0xff) * -1;
-
+		if(val > 0x7F) {
+			val = -((~val + 1) & 0xFF);
+			
 		}
-
+			
+		val = val + 2;
+		
+		return val;
 	}
 
 	private void echo(String string) {
@@ -330,6 +342,10 @@ public class Z80CPU {
 
 	}
 
+	private String hex(int val) {
+		return Integer.toHexString(val);
+	}
+	
 	public int run(int pointer) throws Exception {
 
 		// add a switch case to process each instruction as it comes
@@ -338,10 +354,6 @@ public class Z80CPU {
 			
 			// for keeping progress on where i am and where the code is going
 			progressCounter++;
-			
-//			if(pointer == 0x8f) {
-//				throw new Exception("Got to pointer 0x8f");
-//			}
 			
 			int instruction = Gameboy.memory.readMem(pointer);
 
@@ -386,11 +398,13 @@ public class Z80CPU {
 					pointer += 3;
 					break;
 
-				case 0x32: //  LD function (HL -), A - work out if this is right
+				case 0x32: //  LD (HL -), A - work out if this is right
 
 					writeBit(hl(), a());
 					hl(hl() - 1);
 
+					updateFFlags(hl());
+					
 					pointer += 1;
 					break;
 				case 0xcb: // some bit shifting thing
@@ -417,15 +431,10 @@ public class Z80CPU {
 					pointer += 2;
 					break;
 
-				case 0x20: // JR NZ
-
-					echo("Zero setting is: "+zero());
+				case 0x20: // JR NZ					
 					
 					if(!zero()) {
-						
-						echo("Jumping from pointer: 0x"+Integer.toHexString(pointer));
-						pointer = pointer + signify(param1) + 1;
-						echo("Jumping to pointer: 0x"+Integer.toHexString(pointer));
+						pointer = pointer + signify(param1);
 					} else {
 						pointer += 2;
 					}
@@ -436,8 +445,6 @@ public class Z80CPU {
 
 					c(param1);
 
-//					echo(progressCounter+" Currently doing LD C at pointer: 0x"+Integer.toHexString(pointer) +" : 0x"+Integer.toHexString(param1));
-					
 					pointer += 2;
 
 					break;
@@ -602,8 +609,6 @@ public class Z80CPU {
 
 					a(a() - 1);
 
-					echo(progressCounter+" Descending A at pointer: 0x"+Integer.toHexString(pointer) +" to 0x"+Integer.toHexString(a()));
-					
 					updateFFlags(a());
 
 					pointer++;
@@ -613,8 +618,9 @@ public class Z80CPU {
 				case 0x28: // JR Z
 
 					if(zero()) {
+
 						// work out if that -1 should be there, it doesn't seem right
-						pointer = pointer + signify(param1) + 1;
+						pointer = pointer + signify(param1);
 
 					} else {
 						pointer += 2;
@@ -636,8 +642,6 @@ public class Z80CPU {
 
 				case 0x2e: // LD L N
 
-					echo("Loading into L: 0x"+Integer.toHexString(param1));
-					
 					l(param1);
 
 					pointer += 2;
@@ -646,9 +650,15 @@ public class Z80CPU {
 
 				case 0x18: // JR - Unconditional jump
 
-					echo(progressCounter+" At 0x"+Integer.toHexString(pointer)+" going to: 0x"+Integer.toHexString(pointer + signify(param1) + 1));
+//					if(pointer == 0x53) {
+//						echo("Should be jumping to 0x48, am jumping to 0x"+hex(pointer + signify(param1)));
+//					}
+
+					if(pointer == 0x93) {
+						echo("Should be jumping to 0x60, am jumping to 0x"+hex(pointer + signify(param1)));
+					}
 					
-					pointer = pointer + signify(param1) + 1;
+					pointer = pointer + signify(param1);
 
 					break;
 
@@ -746,6 +756,14 @@ public class Z80CPU {
 					updateFFlags(d());
 
 					pointer++;
+					break;
+				case 0x9f: // SBC A, A
+					
+					a(a() - a() + (carry() ? 1 : 0));
+					
+					updateFFlags(a());
+					
+					pointer++ ;
 					break;
 				default:
 

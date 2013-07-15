@@ -129,10 +129,6 @@ public class Memory {
 	public int readMem(int pos) throws Exception {
 
 //		System.out.println("Reading from memory position: 0x"+Integer.toHexString(pos));
-
-		if(pos >= 0x104 && pos <= 0x133) {
-			System.out.println("Getting the ROM header, I think! At position 0x"+Integer.toHexString(pos));
-		}
 		
 		if(pos < 0x4000) { // 16K ROM
 
