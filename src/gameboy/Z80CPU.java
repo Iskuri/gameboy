@@ -45,6 +45,8 @@ public class Z80CPU {
 	private int registerIX;
 	private int registerIY;
 
+	private int globalPointer = 0;
+	
 	// F Flags
 	private static int fZero = 7;
 	private static int fAddSub = 6;
@@ -64,7 +66,7 @@ public class Z80CPU {
 
 	private void updateFFlags(int flagValue) {
 
-		if(flagValue == 0) {
+		if((flagValue & 0xFF) == 0) {
 			f(setBit(fZero, f()));
 //			echo("The byte was zero");
 		} else {
@@ -355,6 +357,8 @@ public class Z80CPU {
 			// for keeping progress on where i am and where the code is going
 			progressCounter++;
 			
+			globalPointer = pointer;
+			
 			int instruction = Gameboy.memory.readMem(pointer);
 
 			int param1;
@@ -436,6 +440,12 @@ public class Z80CPU {
 					if(!zero()) {
 						pointer = pointer + signify(param1);
 					} else {
+						
+						if(pointer == 0x8c) {
+							echo("Hitting jumping point");
+							System.exit(0);
+						}
+						
 						pointer += 2;
 					}
 
@@ -557,6 +567,8 @@ public class Z80CPU {
 
 					b(b() - 1);
 
+					echo("0x"+hex(pointer)+" DECCING B: 0x"+hex(b()));
+					
 					updateFFlags(b());
 
 					pointer++;
@@ -714,9 +726,9 @@ public class Z80CPU {
 
 				case 0x1d: // DEC E
 
-					d(d() - 1);
+					e(e() - 1);
 
-					updateFFlags(d());
+					updateFFlags(e());
 
 					pointer++;
 
@@ -752,6 +764,8 @@ public class Z80CPU {
 				case 0x15: // DEC D
 
 					d(d() - 1);
+
+					echo("D is decced to: "+hex(d()));
 					
 					updateFFlags(d());
 

@@ -269,7 +269,7 @@ public class LCD {
 		int val = busData[0xff42];
 
 		if(scrollY != val) {
-			System.out.println("Setting y scroll to: "+val);
+//			System.out.println("Setting y scroll to: "+val);
 		}
 
 		scrollY = val;
